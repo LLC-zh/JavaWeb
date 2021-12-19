@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.mapper.PlayMapper">
+
+	<resultMap id="playMap" type="com.web.model.Play">
+		<result property="id" column="id"/>
+		<result property="scenicNumber" column="scenic_number"/>
+		<result property="playIntroduction" column="play_introduction"/>
+		<result property="gmtCreate" column="gmt_create"/>
+		<result property="gmtModified" column="gmt_modified"/>
+	</resultMap>
+	
+	<resultMap id="playWebMap" type="com.web.model.Play">
+		<result property="id" column="id"/>
+		<result property="scenicNumber" column="scenic_name"/>
+		<result property="playIntroduction" column="play_introduction"/>
+		<result property="gmtCreate" column="gmt_create"/>
+		<result property="gmtModified" column="gmt_modified"/>
+	</resultMap>
+	
+	<sql id="primarySql">
+		select id, scenic_number, play_introduction, gmt_create, gmt_modified from play_project
+	</sql>
+	
+	<select id="selectPlayList" parameterType="Map" resultMap="playWebMap">
+		SELECT pp.`id`, sp.`scenic_name`, pp.`play_introduction`, pp.`gmt_create`, pp.`gmt_modified`
+		FROM scenic_project AS sp INNER JOIN play_project AS pp ON sp.`scenic_number` = pp.`scenic_number`
+		<trim prefix="where" prefixOverrides="and">
+			1=1
+			<if test="scenicLocation != null and scenicLocation != ''"> and sp.scenic_location = #{scenicLocation}</if>
+			<if test="scenicNumber != null and scenicNumber != ''"> and sp.scenic_number = #{scenicNumber}</if>
+		</trim>
+		ORDER BY pp.`gmt_create` DESC limit #{currentPageNo},#{pageSize}
+	</select>
+	
+	<select id="selectPlayById" parameterType="Integer" resultMap="playMap">
+		<include refid="primarySql"/>
+		where id = #{id}
+	</select>
+	
+	<select id="selectPlayCount" parameterType="Map" resultType="Integer">
+		SELECT COUNT(1) AS number
+		FROM scenic_project AS sp INNER JOIN play_project AS pp ON sp.`scenic_number` = pp.`scenic_number`
+		<trim prefix="where" prefixOverrides="and" suffixOverrides=",">
+			1=1
+			<if test="scenicLocation != null and scenicLocation != ''"> and sp.scenic_location = #{scenicLocation}</if>
+			<if test="scenicNumber != null and scenicNumber != ''"> and sp.scenic_number = #{scenicNumber}</if>
+		</trim>
+	</select>
+	
+	<insert id="insertPlay" parameterType="com.web.model.Play" useGeneratedKeys="true" keyProperty="id">
+		insert into play_project(scenic_number, play_introduction, gmt_create)
+		values (#{scenicNumber}, #{playIntroduction}, #{gmtCreate})
+	</insert>
+	
+	<update id="updatePlay" parameterType="com.web.model.Play">
+		update play_project
+		<trim prefix="set" suffixOverrides=",">
+			<if test="scenicNumber != null">scenic_number = #{scenicNumber},</if>
+			<if test="playIntroduction != null">play_introduction = #{playIntroduction},</if>
+			<if test="gmtModified != null">gmt_modified = #{gmtModified},</if>
+		</trim>
+		where id = ${id}
+	</update>
+	
+	<delete id="deletePlay" parameterType="Integer">
+		delete from play_project
+		where id = #{id}
+	</delete>
+	
+</mapper>

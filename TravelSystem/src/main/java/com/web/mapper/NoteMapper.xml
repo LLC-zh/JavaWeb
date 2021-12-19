@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.mapper.NoteMapper">
+
+	<resultMap id="noteMap" type="com.web.model.Note">
+		<result property="id" column="id"/>
+		<result property="userUUid" column="user_uuid"/>
+		<result property="noteTitle" column="note_title"/>
+		<result property="noteContent" column="note_content"/>
+		<result property="gmtCreate" column="gmt_create"/>
+		<result property="gmtModified" column="gmt_modified"/>
+	</resultMap>
+	
+	<resultMap id="noteAllMap" type="HashMap">
+		<result property="userName" column="user_name"/>
+		<result property="userUUid" column="user_uuid"/>
+		<result property="noteTitle" column="note_title"/>
+		<result property="noteContent" column="note_content"/>
+		<result property="gmtCreate" column="gmt_create"/>
+	</resultMap>
+
+	<sql id="primarySql">
+		select id, user_uuid, note_title, note_content, gmt_create, gmt_modified from travel_note
+	</sql>
+	
+	<select id="selectNote" resultMap="noteMap">
+		<include refid="primarySql"/>
+		where 1=1
+	</select>
+	
+	<select id="selectNoteAll" resultMap="noteAllMap">
+		SELECT up.`user_name`, tn.`user_uuid`, tn.`note_title`, tn.`note_content`, tn.`gmt_create`
+		FROM travel_note AS tn LEFT JOIN user_project AS up ON tn.`user_uuid`=up.`user_uuid`
+		ORDER BY tn.`gmt_create` DESC
+	</select>
+	
+	<select id="selectNoteById" parameterType="Integer" resultMap="noteMap">
+		<include refid="primarySql"/>
+		where id = #{id}
+	</select>
+	
+	<insert id="insertNote" parameterType="com.web.model.Note" useGeneratedKeys="true" keyProperty="id">
+		insert into travel_note(user_uuid, note_title, note_content, gmt_create)
+		values (#{userUUid}, #{noteTitle}, #{noteContent}, #{gmtCreate})
+	</insert>
+	
+	<update id="updateNote" parameterType="com.web.model.Note">
+		update travel_note
+		<trim prefix="set" suffixOverrides=",">
+			<if test="userUUid != null">user_uuid = #{userUUid},</if>
+			<if test="noteTitle != null">note_title = #{noteTitle},</if>
+			<if test="noteContent != null">note_content = #{noteContent},</if>
+			<if test="gmtModified != null">gmt_modified = #{gmtModified},</if>
+		</trim>
+		where id = #{id}
+	</update>
+	
+	<delete id="deleteNote" parameterType="Integer">
+		delete from travel_note
+		where id = #{id}
+	</delete>
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.mapper.DelicacyMapper">
+
+	<resultMap id="delicacyMap" type="com.web.model.Delicacy">
+		<result property="id" column="id"/>
+		<result property="delicacyName" column="delicacy_name"/>
+		<result property="delicacyPrice" column="delicacy_price"/>
+		<result property="delicacyIntroduction" column="delicacy_introduction"/>
+		<result property="delicacyImage" column="delicacy_image"/>
+		<result property="gmtCreate" column="gmt_create"/>
+		<result property="gmtModified" column="gmt_modified"/>
+	</resultMap>
+	
+	<sql id="primarySql">
+		select id, delicacy_name, delicacy_price, delicacy_introduction, delicacy_image, gmt_create, gmt_modified from delicacy_project
+	</sql>
+	
+	<select id="selectDelicacyList" parameterType="Map" resultMap="delicacyMap">
+		<include refid="primarySql"/>
+		<trim prefix="where" prefixOverrides="and">
+			1=1
+			<if test="delicacyName != null and delicacyName != ''"> and delicacy_name LIKE concat('%',#{delicacyName},'%')</if>
+		</trim>
+		ORDER BY gmt_create DESC LIMIT #{currentPageNo},#{pageSize}
+	</select>
+	
+	<select id="selectDelicacyById" parameterType="Integer" resultMap="delicacyMap">
+		<include refid="primarySql"/>
+		where id = #{id}
+	</select>
+	
+	<select id="selectDelicacyByName" parameterType="String" resultType="Integer">
+		select COUNT(1) as number
+		from delicacy_project
+		<trim prefix="where" prefixOverrides="and">
+			1=1
+			<if test="_parameter != null and _parameter != ''"> and delicacy_name LIKE concat('%',#{delicacyName},'%')</if>
+		</trim>
+	</select>
+	
+	<insert id="insertDelicacy" parameterType="com.web.model.Delicacy" useGeneratedKeys="true" keyProperty="id">
+		insert into delicacy_project(delicacy_name, delicacy_price, delicacy_introduction, delicacy_image, gmt_create)
+		values (#{delicacyName}, #{delicacyPrice}, #{delicacyIntroduction}, #{delicacyImage}, #{gmtCreate})
+	</insert>
+	
+	<update id="updateDelicacy" parameterType="com.web.model.Delicacy">
+		update delicacy_project
+		<trim prefix="set" suffixOverrides=",">
+			<if test="delicacyName != null">delicacy_name = #{delicacyName},</if>
+			<if test="delicacyPrice != null">delicacy_price = #{delicacyPrice},</if>
+			<if test="delicacyIntroduction != null">delicacy_introduction = #{delicacyIntroduction},</if>
+			<if test="delicacyImage != null">delicacy_image = #{delicacyImage},</if>
+			<if test="gmtModified != null">gmt_modified = #{gmtModified},</if>
+		</trim>
+		where id = #{id}
+	</update>
+	
+	<delete id="deleteDelicacy" parameterType="Integer">
+		delete from delicacy_project
+		where id = #{id}
+	</delete>
+</mapper>

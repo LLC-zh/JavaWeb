@@ -1,0 +1,33 @@
+.login {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	background-image: url("../image/bg1.jpg");
+	background-size: cover;
+}
+
+.title {
+	margin: 0px auto 30px auto;
+	text-align: center;
+	color: #707070;
+}
+
+.login-form {
+	border-radius: 6px;
+	background: #ffffff;
+	width: 550px;
+	padding: 25px 25px 5px 25px;
+}
+
+.totop {
+	position: fixed;
+	right: 50px;
+	bottom: 100px;
+}
+.totop a{
+	text-decoration: none;
+}
+.list-group-item a{
+	text-decoration: none;
+}

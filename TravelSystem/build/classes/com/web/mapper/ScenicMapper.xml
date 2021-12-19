@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.mapper.ScenicMapper">
+	
+	<resultMap id="scenicMap" type="com.web.model.Scenic">
+		<result property="id" column="id"/>
+		<result property="scenicNumber" column="scenic_number"/>
+		<result property="scenicName" column="scenic_name"/>
+		<result property="scenicImage" column="scenic_image"/>
+		<result property="scenicLocation" column="scenic_location"/>
+		<result property="scenicDescribe" column="scenic_describe"/>
+		<result property="gmtCreate" column="gmt_create"/>
+		<result property="gmtModified" column="gmt_modified"/>
+	</resultMap>
+	
+	<resultMap id="scenicAllMap" type="HashMap">
+		<result property="scenicNumber" column="scenic_number"/>
+		<result property="scenicName" column="scenic_name"/>
+		<result property="scenicImage" column="scenic_image"/>
+		<result property="scenicLocation" column="scenic_location"/>
+		<result property="scenicDescribe" column="scenic_describe"/>
+		<result property="playIntroduction" column="play_introduction"/>
+		<result property="gmtCreate" column="gmt_create"/>
+	</resultMap>
+	
+	<resultMap id="scenicCountMap" type="HashMap">
+		<result property="scenicLocation" column="scenic_location"/>
+		<result property="scenicNumber" column="scenic_number"/>
+	</resultMap>
+	
+	<resultMap id="scenicNumberMap" type="HashMap">
+		<result property="scenicName" column="scenic_name"/>
+		<result property="scenicNumber" column="scenic_number"/>
+	</resultMap>
+
+	<sql id="primarySql">
+		select id, scenic_number, scenic_name, scenic_image, scenic_location, scenic_describe, gmt_create, gmt_modified from scenic_project
+	</sql>
+
+	<select id="selectScenic" parameterType="Map" resultMap="scenicMap">
+		<include refid="primarySql"/>
+		<trim prefix="where" prefixOverrides="and">
+			1=1
+			<if test="scenicLocation != null and scenicLocation != ''"> and scenic_location = #{scenicLocation}</if>
+		</trim>
+		ORDER BY gmt_create DESC limit #{currentPageNo},#{pageSize}
+	</select>
+	
+	<select id="selectScenicById" parameterType="Integer" resultMap="scenicMap">
+		<include refid="primarySql"/>
+		where id = #{id}
+	</select>
+	
+	<select id="selectScenicAll" resultMap="scenicAllMap">
+		SELECT sp.`scenic_number`, sp.`scenic_name`, sp.`scenic_image`, sp.`scenic_location`,
+        		sp.`scenic_describe`, pp.`play_introduction`, pp.`gmt_create`
+		FROM scenic_project AS sp LEFT JOIN play_project AS pp ON sp.`scenic_number`=pp.`scenic_number`
+		ORDER BY pp.`gmt_create` DESC
+	</select>
+	
+	<select id="selectScenicCountByLocation" parameterType="String" resultType="Integer">
+		SELECT COUNT(1) AS number
+		FROM scenic_project
+		<trim prefix="where" prefixOverrides="and">
+			1=1
+			<if test="_parameter != null and _parameter != ''"> and scenic_location = #{scenicLocation}</if>
+		</trim>
+	</select>
+	
+	<select id="selectScenicNumber" parameterType="String" resultMap="scenicNumberMap">
+		SELECT DISTINCT sp.`scenic_name`, sp.`scenic_number`
+		FROM scenic_project AS sp
+		<trim prefix="where" prefixOverrides="and">
+			1=1
+			<if test="_parameter != null and _parameter != ''"> AND sp.`scenic_location` = #{scenicLocation}</if>
+		</trim>
+	</select>
+	
+	<select id="selectScenicCount" resultMap="scenicCountMap">
+		SELECT scenic_location, COUNT(scenic_location) AS scenic_number
+		FROM scenic_project
+		GROUP BY scenic_location
+	</select>
+	
+	<insert id="insertScenic" parameterType="com.web.model.Scenic" useGeneratedKeys="true" keyProperty="id">
+		insert into scenic_project(scenic_number, scenic_name, scenic_image, scenic_location, scenic_describe, gmt_create)
+		values (#{scenicNumber}, #{scenicName}, #{scenicImage}, #{scenicLocation}, #{scenicDescribe}, #{gmtCreate})
+	</insert> 
+	
+	<update id="updateScenic" parameterType="com.web.model.Scenic">
+		update scenic_project
+		<trim prefix="set" suffixOverrides=",">
+			<if test="scenicNumber != null"> scenic_number = #{scenicNumber},</if>
+			<if test="scenicName != null"> scenic_name = #{scenicName},</if>
+			<if test="scenicImage != null"> scenic_image = #{scenicImage},</if>
+			<if test="scenicLocation != null"> scenic_location = #{scenicLocation},</if>
+			<if test="scenicDescribe != null"> scenic_describe = #{scenicDescribe},</if>
+			<if test="gmtModified != null"> gmt_modified = #{gmtModified},</if>
+		</trim>
+		where id = #{id}
+	</update>
+	
+	<delete id="deleteScenic" parameterType="Integer">
+		delete from scenic_project
+		where id = #{id}
+	</delete>
+</mapper>
