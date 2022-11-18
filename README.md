@@ -1,5 +1,5 @@
 # JavaWeb
-Junior college Java Web Course Design homework, college campus travel strategy system.
+College Java Web Course Design homework, college campus travel strategy system.
 
 ### Matters needing attention:
 
